@@ -1,0 +1,145 @@
+
+
+import foodModel from "../models/foodModel.js";
+import fs from "fs";
+
+// Add food items
+// const addFood = async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ success: false, message: "Image file is required" });
+//     }
+
+//     const image_filename = `${req.file.filename}`;
+
+//     const food = new foodModel({
+//       name: req.body.name,
+//       description: req.body.description,
+//       price: req.body.price,
+//       category: req.body.category,
+//       image: image_filename,
+//     });
+
+//     await food.save();
+//     res.json({ success: true, message: "Food Added" });
+//   } catch (error) {
+//     console.error("Error adding food:", error);
+//     res.status(500).json({ success: false, message: "Error adding food" });
+//   }
+// };
+
+
+const addFood = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Image file is required",
+      });
+    }
+
+    // const food = new foodModel({
+    //   name: req.body.name,
+    //   description: req.body.description,
+    //   price: req.body.price,
+    //   category: req.body.category,
+    //   image: req.file.path, // ✅ Cloudinary URL
+    // });
+
+
+const food = new foodModel({
+  name: req.body.name,
+  description: req.body.description,
+  price: req.body.price,
+  category: req.body.category,
+  image: req.file.path,
+
+  isAvailable: true,
+  stock: 20,
+  isFlashSale: false,
+});
+
+
+
+
+    await food.save();
+
+    res.json({
+      success: true,
+      message: "Food Added",
+    });
+  } catch (error) {
+    console.error("Error adding food:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error adding food",
+    });
+  }
+};
+
+
+
+
+
+
+
+
+// All food list
+const listFood = async (req, res) => {
+  try {
+    const foods = await foodModel.find({});
+    res.json({ success: true, data: foods });
+  } catch (error) {
+    console.error("Error fetching food list:", error);
+    res.status(500).json({ success: false, message: "Error fetching food list" });
+  }
+};
+
+// Remove food items
+const removeFood = async (req, res) => {
+  try {
+    const food = await foodModel.findById(req.body.id);
+    if (food) {
+      fs.unlink(`uploads/${food.image}`, () => {});
+      await foodModel.findByIdAndDelete(req.body.id);
+      res.json({ success: true, message: "Food Removed" });
+    } else {
+      res.status(404).json({ success: false, message: "Food not found" });
+    }
+  } catch (error) {
+    console.error("Error removing food:", error);
+    res.status(500).json({ success: false, message: "Error removing food" });
+  }
+};
+
+
+
+// Toggle Availability
+const toggleAvailability = async (req, res) => {
+  const food = await foodModel.findById(req.body.id);
+  food.isAvailable = !food.isAvailable;
+  await food.save();
+
+  res.json({
+    success: true,
+    message: food.isAvailable
+      ? "Item Available"
+      : "Item Unavailable",
+  });
+};
+
+// Toggle Flash Sale
+const toggleFlashSale = async (req, res) => {
+  const food = await foodModel.findById(req.body.id);
+  food.isFlashSale = !food.isFlashSale;
+  await food.save();
+
+  res.json({
+    success: true,
+    message: food.isFlashSale
+      ? "Flash Sale ON"
+      : "Flash Sale OFF",
+  });
+};
+
+export { addFood, listFood, removeFood,toggleAvailability,toggleFlashSale };
