@@ -182,14 +182,14 @@ import "./List.css";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const List = () => {
-  const API_BASE_URL = "http://localhost:4000/api/food";
+const List = ({ url }) => {
+  // const API_BASE_URL = "http://localhost:4000/api/food";
   const [list, setList] = useState([]);
 
   // Fetch all foods
   const fetchList = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/list`);
+      const response = await axios.get(`${url}/api/food/list`);
       if (response.data.success) {
         setList(response.data.data);
       } else {
@@ -204,7 +204,7 @@ const List = () => {
   // Remove food
   const removeFood = async (foodId) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/remove`, { id: foodId });
+      const response = await axios.post(`${url}/api/food/remove`, { id: foodId });
       if (response.data.success) {
         toast.success(response.data.message);
         fetchList();
@@ -220,7 +220,7 @@ const List = () => {
   // Toggle Available / Unavailable
   const toggleAvailability = async (foodId) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/toggle-availability`, { id: foodId });
+      const response = await axios.post(`${url}/api/food/toggle-availability`, { id: foodId });
       if (response.data.success) {
         toast.success(response.data.message || "Status Updated");
         fetchList();
